@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: outfit-rating
+
+  datasource:
+    # Port 5433 by default so the container never fights a PostgreSQL already installed on the host.
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:outfitrating}}
+    username: ${DB_USERNAME:outfit}
+    password: ${DB_PASSWORD:outfit}
+    hikari:
+      maximum-pool-size: 10
+      pool-name: outfit-pool
+
+  jpa:
+    # Flyway owns the schema; Hibernate only checks that the mappings still line up with it.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        # Lazy associations on a page of results are loaded in one extra query, not N.
+        default_batch_fetch_size: 64
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 12MB
+
+  jackson:
+    # Jackson 3 already writes ISO-8601 for java.time and keeps nulls, which is what the
+    # TypeScript client expects: a field that is always present is easier to type than one that
+    # vanishes. Only the error envelope opts out, via @JsonInclude on the record itself.
+    default-property-inclusion: always
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+  compression:
+    enabled: true
+    mime-types: application/json,text/css,text/javascript
+
+app:
+  jwt:
+    # Override in every real deployment. Must be at least 32 bytes.
+    secret: ${APP_JWT_SECRET:dev-only-secret-change-me-before-you-deploy-anywhere}
+    access-token-minutes: ${APP_JWT_ACCESS_MINUTES:60}
+    refresh-token-days: ${APP_JWT_REFRESH_DAYS:30}
+    issuer: outfitrating
+    secure-cookie: ${APP_SECURE_COOKIE:false}
+  storage:
+    location: ${APP_STORAGE_DIR:./uploads}
+    public-path: /uploads
+    max-file-size-bytes: 8388608
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+      - image/avif
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:4173
+  demo-data:
+    # Populates an empty database with a realistic catalogue so the app is not a blank page.
+    enabled: ${APP_SEED_DEMO:true}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    com.outfitrating: INFO
+    org.hibernate.orm.jdbc.bind: WARN

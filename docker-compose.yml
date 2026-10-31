@@ -1,0 +1,54 @@
+name: outfitrating
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: outfitrating-db
+    environment:
+      POSTGRES_DB: outfitrating
+      POSTGRES_USER: outfit
+      POSTGRES_PASSWORD: outfit
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outfit -d outfitrating"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Full-stack bundle: `docker compose --profile full up --build`.
+  # Day-to-day development only needs `docker compose up -d db`.
+  api:
+    profiles: ["full"]
+    build:
+      context: ./backend/OutfitRating
+    container_name: outfitrating-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/outfitrating
+      DB_USERNAME: outfit
+      DB_PASSWORD: outfit
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-dev-only-secret-change-me-before-you-deploy-anywhere}
+      APP_STORAGE_DIR: /var/outfitrating/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/var/outfitrating/uploads
+
+  web:
+    profiles: ["full"]
+    build:
+      context: ./frontend
+    container_name: outfitrating-web
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  db-data:
+  uploads:

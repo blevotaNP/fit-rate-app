@@ -1,0 +1,45 @@
+# Tests run against an in-memory H2 in PostgreSQL compatibility mode.
+#
+# Flyway is off here on purpose: the migrations are written in PostgreSQL dialect and are verified
+# against a real PostgreSQL container in the normal run. Letting Hibernate generate the test schema
+# from the same entity mappings keeps the suite fast and dependency-free, while `ddl-auto: validate`
+# in production still proves the entities and the migrations agree.
+spring:
+  datasource:
+    url: jdbc:h2:mem:outfitrating;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 64
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: test-secret-that-is-definitely-long-enough-for-hmac-sha
+    access-token-minutes: 60
+    refresh-token-days: 7
+    issuer: outfitrating-test
+    secure-cookie: false
+  storage:
+    location: ./build/test-uploads
+    public-path: /uploads
+    max-file-size-bytes: 1048576
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+  demo-data:
+    enabled: false
+
+logging:
+  level:
+    org.hibernate.SQL: WARN

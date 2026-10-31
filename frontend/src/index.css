@@ -1,0 +1,164 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens.
+ *
+ * The palette is near-monochrome on purpose: every card on this site is a photograph of clothing,
+ * and a coloured interface competes with the thing it is presenting. Exactly one accent colour
+ * (flare) marks interactive intent, and a separate five-step scale encodes scores so a number's
+ * colour always means the same thing.
+ */
+@theme {
+  --color-ink-950: #08080a;
+  --color-ink-900: #0d0d10;
+  --color-ink-850: #131317;
+  --color-ink-800: #191920;
+  --color-ink-750: #1f1f27;
+  --color-ink-700: #272730;
+  --color-ink-600: #383843;
+  --color-ink-500: #4b4b58;
+
+  --color-mist-500: #6f6f7d;
+  --color-mist-400: #8b8b99;
+  --color-mist-300: #a9a9b6;
+  --color-mist-200: #c9c9d2;
+  --color-mist-100: #e6e6ea;
+  --color-mist-50: #f5f5f7;
+
+  --color-flare-600: #e8431f;
+  --color-flare-500: #ff5c38;
+  --color-flare-400: #ff8062;
+  --color-flare-300: #ffa993;
+
+  --color-score-elite: #4ade80;
+  --color-score-high: #a3e635;
+  --color-score-mid: #fbbf24;
+  --color-score-low: #fb923c;
+  --color-score-poor: #f87171;
+
+  --font-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 14px;
+
+  --animate-rise: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-fade: fade 0.3s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-ink-700);
+  }
+
+  html {
+    color-scheme: dark;
+    scrollbar-color: var(--color-ink-600) transparent;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ink-950);
+    color: var(--color-mist-100);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Scores and counts read as data, so they get tabular figures everywhere. */
+  .numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  ::selection {
+    background: var(--color-flare-500);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-flare-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .panel {
+    background-color: var(--color-ink-850);
+    border: 1px solid var(--color-ink-700);
+    border-radius: var(--radius-card);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-mist-400);
+  }
+
+  /* Slim custom scrollbar for rails and the sticky sidebar. */
+  .rail {
+    scrollbar-width: thin;
+  }
+
+  .rail::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .rail::-webkit-scrollbar-thumb {
+    background: var(--color-ink-600);
+    border-radius: 999px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
